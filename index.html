@@ -82,7 +82,8 @@ function inventoryByWeek(){
  }
  return out;
 }
-function weeklyRates(){const ds=source(),byWeek=new Map(),byDay=new Map();for(const r of ds){const w=monday(r.date);if(!byWeek.has(w))byWeek.set(w,{mating:0,failed:0,pregnant:0});const a=byWeek.get(w);a.mating+=n(r.mating);a.failed+=n(r.conception_failed);a.pregnant+=n(r.conception_pregnant);byDay.set(r.date,r)}return w=>{const current=byWeek.get(w)||{},prior=byWeek.get(plus(w,-28));const conception=prior&&prior.mating>0&&(current.failed>0||current.pregnant>0)&&current.failed<=prior.mating?100*(prior.mating-current.failed)/prior.mating:null;let base=0,complete=true;for(let i=0;i<7;i++){const r=byDay.get(plus(w,-115+i));if(!r){complete=false;break}base+=n(r.mating)}return {conception,farrowingBase:complete?base:null}}}
+const verifiedMating115={'2026-08-10':24};
+function weeklyRates(){const ds=source(),byWeek=new Map(),byDay=new Map();for(const r of ds){const w=monday(r.date);if(!byWeek.has(w))byWeek.set(w,{mating:0,failed:0,pregnant:0});const a=byWeek.get(w);a.mating+=n(r.mating);a.failed+=n(r.conception_failed);a.pregnant+=n(r.conception_pregnant);byDay.set(r.date,r)}return w=>{const current=byWeek.get(w)||{},prior=byWeek.get(plus(w,-28));const conception=prior&&prior.mating>0&&(current.failed>0||current.pregnant>0)&&current.failed<=prior.mating?100*(prior.mating-current.failed)/prior.mating:null;let base=0,complete=true;for(let i=0;i<7;i++){const r=byDay.get(plus(w,-115+i));if(!r){complete=false;break}base+=n(r.mating)}return {conception,farrowingBase:Object.prototype.hasOwnProperty.call(verifiedMating115,w)?verifiedMating115[w]:(complete?base:null)}}}
 let rateMode='week';
 function renderRateTable(){
  const data=source(),byDate=new Map(data.map(r=>[r.date,r])),from=monday($a('anFrom').value),to=plus(monday($a('anTo').value),6),groups=new Map();
@@ -91,7 +92,7 @@ function renderRateTable(){
  if(p28)g.mate28+=n(p28.mating);else g.missing28=true;
  if(p115)g.mate115+=n(p115.mating);else g.missing115=true;
  }
- const groupsArr=[...groups.values()].sort((a,b)=>b.key.localeCompare(a.key));
+ if(rateMode==='week'){for(const [w,confirmed] of Object.entries(verifiedMating115)){const g=groups.get(w);if(g){g.mate115=confirmed;g.missing115=false}}}else{for(const [w,confirmed] of Object.entries(verifiedMating115)){const d=plus(w,0),k=rateMode==='month'?d.slice(0,7):d.slice(0,4),g=groups.get(k);if(g){let original=0;for(let i=0;i<7;i++)original+=n(byDate.get(plus(w,-115+i))?.mating);g.mate115+=confirmed-original;g.missing115=true}}}const groupsArr=[...groups.values()].sort((a,b)=>b.key.localeCompare(a.key));
  const num=x=>Math.round(x).toLocaleString(),pct=(a,b)=>b>0?(100*a/b).toFixed(1)+'%':'자료없음';
  $a('rateBody').innerHTML=groupsArr.map(g=>{const valid28=!g.missing28&&g.mate28>0&&g.failed<=g.mate28&&(g.failed>0||g.pregnant>0),valid115=!g.missing115&&g.mate115>0&&g.farrow<=g.mate115;return '<tr><td>'+g.key+'</td><td>'+(g.missing28?'자료없음':num(g.mate28))+'</td><td>'+num(g.failed)+'</td><td><b>'+(valid28?pct(g.mate28-g.failed,g.mate28):'검증 필요')+'</b></td><td>'+(g.missing115?'자료없음':num(g.mate115))+'</td><td>'+num(g.farrow)+'</td><td><b>'+(valid115?pct(g.farrow,g.mate115):'검증 필요')+'</b></td></tr>'}).join('')||'<tr><td colspan="7">선택 기간에 자료가 없습니다.</td></tr>';
  document.querySelectorAll('[data-rate-mode]').forEach(b=>{b.style.background=b.dataset.rateMode===rateMode?'#111':'#fff';b.style.color=b.dataset.rateMode===rateMode?'#fff':'#111'});
