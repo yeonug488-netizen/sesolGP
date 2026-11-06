@@ -47,7 +47,7 @@ html+='<div class="dailyCards">';
 const inputCell=(id,title,label,header)=>'<input class="xlsInput" data-cell="'+id+'" inputmode="decimal" aria-label="'+esc(title+' '+label+' '+header)+'" value="'+esc(saved[id]??'')+'">';
 sections.forEach(([row,col,title,headers,labels])=>{
  const wide=headers.length>4;
- html+='<section class="dailyCard'+(wide?' wide':'')+'"><div class="dailyCardHead"><span class="dailyCardNum">'+esc(title.split(/[ ,]/)[0])+'</span><span class="dailyCardTitle">'+esc(title.replace(/^\\d+[,. ]*/,''))+'</span></div><div class="dailyTableWrap"><table class="dailyTable"><thead><tr>'+headers.map(h=>'<th>'+esc(h)+'</th>').join('')+'</tr></thead><tbody>';
+ html+='<section class="dailyCard'+(wide?' wide':'')+'"><div class="dailyCardHead"><span class="dailyCardNum">'+esc(title.split(/[ ,]/)[0])+'</span><span class="dailyCardTitle">'+esc(title.replace(/^[0-9]+[,. ]*/,''))+'</span></div><div class="dailyTableWrap"><table class="dailyTable"><thead><tr>'+headers.map(h=>'<th>'+esc(h)+'</th>').join('')+'</tr></thead><tbody>';
  labels.forEach((label,i)=>{html+='<tr><th>'+esc(label)+'</th>';for(let j=1;j<headers.length;j++){const id=(row+1+i)+'_'+(col+j);html+='<td>'+inputCell(id,title,label,headers[j])+'</td>'}html+='</tr>'});
  html+='</tbody></table></div></section>';
 });
