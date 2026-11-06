@@ -51,7 +51,7 @@ sections.forEach(([row,col,title,headers,labels])=>{
  labels.forEach((label,i)=>{html+='<tr><th>'+esc(label)+'</th>';for(let j=1;j<headers.length;j++){const id=(row+1+i)+'_'+(col+j);html+='<td>'+inputCell(id,title,label,headers[j])+'</td>'}html+='</tr>'});
  html+='</tbody></table></div></section>';
 });
-html+='<section class="dailyCard wide"><div class="dailyCardHead"><span class="dailyCardTitle">📝 특이사항</span></div><div style="padding:15px"><textarea id="sheetMemo" class="dailyMemo" placeholder="오늘 특이사항을 기록해 주세요">'+esc(saved.memo||'')+'</textarea></div></section></div>';
+html+='</div>';
 html+='<div class="sheetActions"><button type="button" class="btn2" id="sheetExport">CSV 내보내기</button><button type="button" class="btn" id="sheetSave">사육일보 저장</button></div>';
 html+='<p class="note">연한 초록색은 자동 계산 항목입니다. 전일재고는 전날 마감재고를 자동으로 가져옵니다.</p>';
 el.innerHTML=html;
@@ -151,7 +151,7 @@ totals();
  }catch(e){console.warn('월 누계 조회 실패',e)}})();
 document.getElementById('sheetSave').onclick=async()=>{
  if(!d||d<'2026-11-01')return alert('11월 1일 이후 날짜를 선택해줘');
- totals();if(Array.from({length:7},(_,i)=>get(4,i+3)).some(x=>!x||x.value===''))return alert('전날 사육일보의 당일재고가 없어 저장할 수 없습니다. 전날 일보를 먼저 저장해 주세요.');const obj={memo:document.getElementById('sheetMemo').value,gilt_purchase_type:purchaseType.value};
+ totals();if(Array.from({length:7},(_,i)=>get(4,i+3)).some(x=>!x||x.value===''))return alert('전날 사육일보의 당일재고가 없어 저장할 수 없습니다. 전날 일보를 먼저 저장해 주세요.');const obj={memo:saved.memo||'',gilt_purchase_type:purchaseType.value};
  el.querySelectorAll('[data-cell]').forEach(x=>obj[x.dataset.cell]=x.value);
  const row={report_date:d,sheet_data:obj,memo:obj.memo,
  breeding_stock:num(5,3)+num(5,4)+num(5,5),
@@ -168,7 +168,7 @@ document.getElementById('sheetSave').onclick=async()=>{
  if(window.daily){const i=window.daily.findIndex(x=>x.report_date===d);if(i>=0)window.daily[i]={...window.daily[i],...row};else window.daily.push(row)}
  alert(d+' 일보 공동 DB 저장 완료');
 };
-document.getElementById('sheetExport').onclick=()=>{if(!d)return alert('날짜를 선택해줘');const data=[['날짜','셀','값'],...Array.from(el.querySelectorAll('[data-cell]')).map(x=>[d,x.dataset.cell,x.value]),[d,'특이사항',document.getElementById('sheetMemo').value]];const csv='\uFEFF'+data.map(a=>a.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(',')).join('\r\n');const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));a.download=d+'-사육일보.csv';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000)};
+document.getElementById('sheetExport').onclick=()=>{if(!d)return alert('날짜를 선택해줘');const data=[['날짜','셀','값'],...Array.from(el.querySelectorAll('[data-cell]')).map(x=>[d,x.dataset.cell,x.value]),[d,'특이사항',saved.memo||'']];const csv='\uFEFF'+data.map(a=>a.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(',')).join('\r\n');const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));a.download=d+'-사육일보.csv';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000)};
 }
 document.addEventListener('click',e=>{if(e.target.closest('.dateBtn,.tab'))setTimeout(render,0)});document.getElementById('dDate').addEventListener('change',()=>{const d=document.getElementById('dDate').value;document.getElementById('monthPick').value=d.slice(0,7);render();});
 try{render();}catch(e){const x=document.getElementById('dailyFormError');if(x)x.textContent='사육일보 표시 오류: '+e.message;console.error('사육일보 표시 오류',e);}
