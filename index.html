@@ -253,7 +253,7 @@ function renderRateTable(){
  const valid=g.eligible>0&&!g.missing&&g.base>0&&(rateMode==='week'||rateMode==='month');
  const base=valid?g.base.toFixed(1):'자료없음';
  const pct=valid?(100*g.farrow/g.base).toFixed(1)+'%':'자료없음';
- return '<tr><td>'+(rateMode==='week'?k.slice(2):k.slice(2))+'</td><td>'+g.mating.toLocaleString()+'</td><td>'+base+'</td><td>'+g.farrow.toLocaleString()+'</td><td><b>'+pct+'</b></td></tr>';
+ return '<tr><td>'+(rateMode==='week'?(k.slice(2)+' ~ '+plus(k,6).slice(2)):k.slice(2))+'</td><td>'+g.mating.toLocaleString()+'</td><td>'+base+'</td><td>'+g.farrow.toLocaleString()+'</td><td><b>'+pct+'</b></td></tr>';
  }).join('')||'<tr><td colspan="5">선택 기간에 자료가 없습니다.</td></tr>';
  document.querySelectorAll('[data-rate-mode]').forEach(b=>{b.style.background=b.dataset.rateMode===rateMode?'#111':'#fff';b.style.color=b.dataset.rateMode===rateMode?'#fff':'#111'});
 }
