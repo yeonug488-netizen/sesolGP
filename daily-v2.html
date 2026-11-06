@@ -42,7 +42,7 @@ const getDate=()=>document.getElementById('dDate').value;
 const key=d=>'sesolGP:dailySheet:'+d;
 function render(){
 let el=document.getElementById('originalTables');if(!el)return;
-let d=getDate(),saved={};try{saved=JSON.parse(localStorage.getItem(key(d))||'{}')}catch(e){};let record=window.daily?.find(x=>x.report_date===d);if(record?.sheet_data)saved=record.sheet_data;
+let d=getDate(),saved={};let record=window.daily?.find(x=>x.report_date===d);if(record?.sheet_data)saved=record.sheet_data; // 공동 DB만 진실의 원천: 삭제된 테스트 자료를 브라우저 캐시에서 복원하지 않음
 if(saved.gilt_purchase_type==='internal'&&saved['29_11']===undefined){saved['29_11']=saved['28_11']||'0';saved['28_11']='0'}
 let html='<div class="dailyHero"><div><strong>오늘의 사육 기록</strong><div><span>'+esc(d)+' · 입력한 수치는 자동으로 누계와 생산성적에 연결됩니다.</span></div></div><span>새솔 GP</span></div>';
 html+='<div class="dailyCards">';
