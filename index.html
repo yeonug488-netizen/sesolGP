@@ -8,7 +8,7 @@ const sections=[
 [27,10,'4,구매두수',['구 분','후보돈'],['외부 구매','자체 F1 편입','당일 합계','월 누 계']],
 [4,13,'5 교배현황',['구분','당일','월누계'],['후보돈','경산돈','재발돈','소 계']],
 [4,17,'6 수태현황',['구분','금주','월누계'],['교 배','수 태','재발/미임','소 계']],
-[11,13,'7 분만현황',['구분','금주','월누계'],['분만복수','총산자수','생존산자수','사 산','미 이 라','사 고','총산자수','생존산자수']],
+[11,13,'7 분만현황',['구분','금주','월누계'],['분만복수','총산자수','생존산자수','사산','미이라','압사','사고(합계)']],
 [33,2,'8 구간이동',['구분','당일 이동','월 누계'],['포유자돈 → 이유자돈','이유자돈 → 육성돈']]
 ];
 const st=document.createElement('style');st.textContent=`
@@ -45,7 +45,7 @@ let d=getDate(),saved={};try{saved=JSON.parse(localStorage.getItem(key(d))||'{}'
 if(saved.gilt_purchase_type==='internal'&&saved['29_11']===undefined){saved['29_11']=saved['28_11']||'0';saved['28_11']='0'}
 let html='<div class="dailyHero"><div><strong>오늘의 사육 기록</strong><div><span>'+esc(d)+' · 입력한 수치는 자동으로 누계와 생산성적에 연결됩니다.</span></div></div><span>새솔 GP</span></div>';
 html+='<div class="dailyCards">';
-const inputCell=(id,title,label,header)=>'<input class="xlsInput" data-cell="'+id+'" inputmode="decimal" aria-label="'+esc(title+' '+label+' '+header)+'" value="'+esc(saved[id]??'')+'"'+((id.startsWith('4_')||id.startsWith('5_'))?' readonly tabindex="-1" title="사육두수는 입출고 기록으로만 자동 계산됩니다"':'')+'>';
+const inputCell=(id,title,label,header)=>'<input class="xlsInput" data-cell="'+id+'" inputmode="decimal" aria-label="'+esc(title+' '+label+' '+header)+'" value="'+esc(saved[id]??'')+'"'+((id.startsWith('4_')||id.startsWith('5_')||id==='18_14'||id==='18_15')?' readonly tabindex="-1" title="사육두수는 입출고 기록으로만 자동 계산됩니다"':'')+'>';
 sections.forEach(([row,col,title,headers,labels])=>{
  const wide=headers.length>4;
  html+='<section class="dailyCard'+(wide?' wide':'')+'"><div class="dailyCardHead"><span class="dailyCardNum">'+esc(title.split(/[ ,]/)[0])+'</span><span class="dailyCardTitle">'+esc(title.replace(/^[0-9]+[,. ]*/,''))+'</span></div><div class="dailyTableWrap"><table class="dailyTable"><thead><tr>'+headers.map(h=>'<th>'+esc(h)+'</th>').join('')+'</tr></thead><tbody>';
@@ -97,8 +97,8 @@ function totals(){
  put(8,14,num(5,14)+num(6,14)+num(7,14));
  // 수태율 R8은 금주 수태/교배이며, 원본의 비율 셀은 누계 합산 대상이 아니다.
  const rate=get(8,18);if(rate){rate.value=num(5,18)?String((num(6,18)/num(5,18)*100).toFixed(1)):'';rate.readOnly=true}
- // 분만 평균은 총산자수/분만복수
- for(const [r,top] of [[20,13],[21,14]]){const x=get(r,14);if(x){x.value=num(12,14)?String((num(top,14)/num(12,14)).toFixed(2)):'';x.readOnly=true}}
+ // 사고(합계)는 사산 + 미이라 + 압사이며 직접 수정할 수 없다.
+ put(18,14,num(15,14)+num(16,14)+num(17,14));
  // 당일재고 = 전일재고 + 실제 입식/분만 - 폐사/판매/편입.
  // 교배·수태는 재고 변동이 아니므로 반영하지 않는다.
  // 자돈 판매는 이유자돈, 비육돈 판매는 육성돈에서 차감한다.
@@ -153,7 +153,7 @@ function totals(){
  ...[3,4,5,6,7].map(c=>[29,c,28,c]),
  [31,11,30,11],
  [34,4,34,3],[35,4,35,3],
- ...[5,6,7,8,12,13,14,16,17,19].map(r=>[r,15,r,14]),
+ ...[5,6,7,8,12,13,14,15,16,17,18].map(r=>[r,15,r,14]),
  ...[5,6,7].map(r=>[r,19,r,18])
  ];
  for(const [targetRow,targetCol,sourceRow,sourceCol] of cumulative){
