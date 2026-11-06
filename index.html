@@ -5,8 +5,8 @@ const sections=[
 [3,2,'1,사육두수',['구분','후보돈','모돈','웅돈','포유자돈','이유자돈','육성돈','탈락돈','소 계'],['전일재고','당일재고']],
 [7,2,'2,도폐사두수',['구분','후보돈','모돈','웅돈','포유자돈','이유자돈','육성돈','탈락돈','소 계'],['당  일','월 누 계']],
 [11,2,'3,도폐사두수-상세',['구분','후보돈','모돈','웅돈','포유자돈','이유자돈','육성돈','탈락돈','소 계'],['당  일','월 누 계']],
-[27,2,'4,판매두수',['구 분','후보돈','자돈','비육돈','비육(기타)','모돈판매'],['당  일','월 누 계']],
-[27,8,'5,구매두수',['구 분','후보돈'],['당  일','월 누 계']],
+[27,2,'4,판매두수',['구 분','후보돈','자돈','비육돈','도태(모돈)','도태(웅돈)'],['당  일','월 누 계']],
+[27,10,'5,구매두수',['구 분','후보돈'],['당  일','월 누 계']],
 [4,13,'6 교배현황',['구분','당일','월누계'],['후보돈','경산돈','재발돈','소 계']],
 [4,17,'7 수태현황',['구분','금주','월누계'],['교 배','수 태','재발/미임','소 계']],
 [11,13,'8 분만현황',['구분','금주','월누계'],['분만복수','총산자수','생존산자수','사 산','미 이 라','사 고','평총산자수','평생존산자수']]
@@ -65,12 +65,12 @@ function totals(){
  for(const [r,top] of [[20,13],[21,14]]){const x=get(r,14);if(x){x.value=num(12,14)?String((num(top,14)/num(12,14)).toFixed(2)):'';x.readOnly=true}}
  // 원본 엑셀 C5:I5 당일재고 수식을 동일한 전입·전출 기준으로 적용
  const formulas=[
- [3,()=>num(4,3)+num(28,9)-num(8,3)+num(20,18)-num(20,19)-num(5,14)],
+ [3,()=>num(4,3)+num(28,11)-num(8,3)+num(20,18)-num(20,19)-num(5,14)],
  [4,()=>num(4,4)-num(8,4)+num(5,14)-num(28,7)],
  [5,()=>num(4,5)-num(8,5)],
  [6,()=>num(4,6)-num(8,6)+num(16,18)-num(16,19)],
  [7,()=>num(4,7)-num(8,7)-num(17,19)+num(17,18)],
- [8,()=>num(4,8)-num(8,8)-num(18,19)+num(18,18)-(purchaseType.value==='internal'?num(28,9):0)],
+ [8,()=>num(4,8)-num(8,8)-num(18,19)+num(18,18)-(purchaseType.value==='internal'?num(28,11):0)],
  [9,()=>num(4,9)+num(21,18)-num(21,19)]
  ];
  // 이전 날짜의 재고가 아직 없으면 임의로 재고를 산출하지 않는다.
@@ -93,7 +93,7 @@ function totals(){
  ...[...Array(7)].map((_,i)=>[13,3+i,12,3+i]),
  
  ...[3,4,5,6,7].map(c=>[29,c,28,c]),
- [29,9,28,9],
+ [29,11,28,11],
  ...[5,6,7,8,12,13,14,16,17,19].map(r=>[r,15,r,14]),
  ...[5,6,7].map(r=>[r,19,r,18])
  ];
@@ -138,7 +138,7 @@ document.getElementById('sheetSave').onclick=async()=>{
  suckling_loss:num(16,10),weaning_loss:num(20,10),
  mating:num(8,14),pregnancy:num(6,19),
  farrowing:num(12,14),total_born:num(13,14),live_born:num(14,14),
- purchase:num(28,9),sale:Array.from({length:5},(_,i)=>num(28,3+i)).reduce((a,b)=>a+b,0),
+ purchase:num(28,11),sale:Array.from({length:5},(_,i)=>num(28,3+i)).reduce((a,b)=>a+b,0),
  updated_at:new Date().toISOString()};
  const res=await fetch('https://lmjubklvkstkmwywpmth.supabase.co/rest/v1/daily_reports?on_conflict=report_date',{method:'POST',headers:{apikey:'sb_publishable_3p5fYCKSGbWIB7V4vd8qzg_q0E7VzF2',Authorization:'Bearer sb_publishable_3p5fYCKSGbWIB7V4vd8qzg_q0E7VzF2','Content-Type':'application/json',Prefer:'resolution=merge-duplicates,return=minimal'},body:JSON.stringify(row)});
  if(!res.ok)return alert('공동 DB 저장 오류: '+(await res.text()).slice(0,180));
@@ -174,7 +174,7 @@ function liveSource(){
  farrow_sows:v(s,12,14),total_born:v(s,13,14),live_born:v(s,14,14),
  death_suckling:v(s,8,6),death_weaned:v(s,8,7),death_growing:v(s,8,8),
  sale_f1:v(s,28,3),sale_piglets:v(s,28,4),sale_fattening:v(s,28,5),
- sale_other:v(s,28,6)+v(s,28,7),
+ sale_other:v(s,28,6)+v(s,28,7),sale_cull_sow:v(s,28,6),sale_cull_boar:v(s,28,7),
  stock_suck:v(s,5,6),stock_wean:v(s,5,7),stock_grow:v(s,5,8),
  stock_total:v(s,5,10),stock_present:s['5_10']!==undefined&&s['5_10']!==''
  }}).sort((a,b)=>a.date.localeCompare(b.date));
