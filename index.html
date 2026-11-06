@@ -10,27 +10,50 @@ const sections=[
 [4,17,'6 수태현황',['구분','금주','월누계'],['교 배','수 태','재발/미임','소 계']],
 [11,13,'7 분만현황',['구분','금주','월누계'],['분만복수','총산자수','생존산자수','사 산','미 이 라','사 고','평총산자수','평생존산자수']]
 ];
-const st=document.createElement('style');st.textContent='#originalTables{overflow:auto}.xlsGrid{display:grid;grid-template-columns:repeat(19,minmax(72px,1fr));grid-template-rows:repeat(32,32px);min-width:1490px;background:#fff;border:1px solid #adb6c0}.xlsCell{border:1px solid #d5dce3;display:flex;align-items:center;justify-content:center;font-size:12px;white-space:nowrap;min-width:0}.xlsTitle{background:#dce9f2;font-weight:800}.xlsHead{background:#eff4f7;font-weight:700}.xlsInput{width:100%;height:100%;border:0;outline:0;text-align:center;font:inherit;background:#fffdf1;min-width:0}.xlsInput:focus{background:#fff0bc;box-shadow:inset 0 0 0 2px #2563eb}.xlsWide{grid-column:13/span 7}.sheetActions{display:flex;gap:8px;justify-content:flex-end;margin:10px 0}';document.head.appendChild(st);
+const st=document.createElement('style');st.textContent=`
+#originalTables{overflow:visible}
+.dailyHero{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:0 0 18px;padding:17px 20px;background:linear-gradient(120deg,#ecfdf5,#eff6ff);border:1px solid #d4e9e2;border-radius:16px}
+.dailyHero strong{font-size:17px;color:#145c4b}.dailyHero span{font-size:12px;color:#567268}
+.dailyCards{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+.dailyCard{border:1px solid #e2e8f0;border-radius:16px;background:#fff;overflow:hidden;box-shadow:0 5px 16px rgba(24,47,67,.045)}
+.dailyCard.wide{grid-column:1/-1}
+.dailyCardHead{display:flex;align-items:center;gap:10px;padding:15px 18px;background:#f8fafc;border-bottom:1px solid #e7edf2}
+.dailyCardNum{background:#dcefe9;color:#16765d;font-weight:800;font-size:12px;border-radius:9px;padding:7px 10px}
+.dailyCardTitle{font-size:16px;font-weight:800;color:#203347}
+.dailyTableWrap{overflow-x:auto;padding:10px 14px 15px}
+.dailyTable{width:100%;min-width:0;border-collapse:separate;border-spacing:0 7px;table-layout:auto}
+.dailyTable th,.dailyTable td{border:0;padding:6px 7px;text-align:center;font-size:12px;min-width:0}
+.dailyTable thead th{background:#f0f5f8;color:#516577;font-weight:700;border-radius:6px;white-space:nowrap}
+.dailyTable tbody th{background:#f7f9fb;color:#526376;font-weight:700;border-radius:6px;white-space:nowrap}
+.dailyTable .xlsInput{width:100%;min-width:55px;max-width:120px;box-sizing:border-box;border:1px solid #dbe3eb;border-radius:8px;background:#fff;padding:9px 4px;font-size:13px;text-align:center;outline:none}
+.dailyTable .xlsInput:focus{border-color:#10a37f;box-shadow:0 0 0 3px #10a37f22;background:#fff}
+.dailyTable .xlsInput[readonly]{background:#eef6f3;color:#28614e;border-color:#deebe5}
+.dailyTable td:last-child .xlsInput{font-weight:800}
+.dailyControls{display:flex;flex-wrap:wrap;align-items:center;gap:12px;margin:0 0 15px;padding:14px 17px;border-radius:13px;background:#f5f9f7;border:1px solid #e0eee6}
+.dailyControls select{border:1px solid #cddfd7;border-radius:8px;padding:9px;background:white;max-width:100%}
+.dailyMemo{width:100%;min-height:90px;box-sizing:border-box;border:1px solid #dbe3eb;border-radius:10px;padding:12px;resize:vertical;font:inherit}
+.sheetActions{display:flex;gap:9px;justify-content:flex-end;flex-wrap:wrap;margin:14px 0}
+@media(max-width:1100px){.dailyCards{grid-template-columns:1fr}.dailyCard.wide{grid-column:auto}}
+`;document.head.appendChild(st);
 const esc=x=>String(x??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;');
 const getDate=()=>document.getElementById('dDate').value;
 const key=d=>'sesolGP:dailySheet:'+d;
 function render(){
 let el=document.getElementById('originalTables');if(!el)return;
 let d=getDate(),saved={};try{saved=JSON.parse(localStorage.getItem(key(d))||'{}')}catch(e){};let record=window.daily?.find(x=>x.report_date===d);if(record?.sheet_data)saved=record.sheet_data;
-let html='<div style="padding:12px;background:#edf6f1;margin-bottom:10px;border-radius:8px"><label for="giltPurchaseType"><b>5번 후보돈 구매 구분</b></label> <select id="giltPurchaseType" style="padding:8px"><option value="external">GGP 외부 구매</option><option value="internal">자체 생산 F1 후보돈 편입 (육성돈에서 이동)</option></select><p class="note">내부 F1 편입은 후보돈 증가와 동시에 육성돈에서 차감합니다.</p></div><div class="sheetActions"><button type="button" class="btn" id="sheetSave">이 날짜 원본양식 저장</button><button type="button" class="btn2" id="sheetExport">입력자료 CSV 내보내기</button></div><div class="xlsGrid">';
-const cell=(row,col,body,cl='')=>{html+='<div class="xlsCell '+cl+'" style="grid-row:'+row+';grid-column:'+col+'">'+body+'</div>'};
-html+='<div class="xlsCell xlsTitle" style="grid-row:1;grid-column:2/span 9">새솔GP 사육 일보</div>';
-html+='<div class="xlsCell xlsTitle" style="grid-row:1;grid-column:13/span 7">'+esc(d)+'</div>';
-sections.forEach(([row,col,title,headers,rows,compact])=>{
-if(!compact){html+='<div class="xlsCell xlsTitle" style="grid-row:'+(row-1)+';grid-column:'+col+'/span '+headers.length+'">'+esc(title)+'</div>';}
-headers.forEach((v,j)=>cell(row,col+j,esc(v),'xlsHead'));
-rows.forEach((label,i)=>{cell(row+1+i,col,esc(label),'xlsHead');for(let j=1;j<headers.length;j++){
-let id=(row+1+i)+'_'+(col+j);let val=saved[id]??'';
-cell(row+1+i,col+j,'<input class="xlsInput" data-cell="'+id+'" inputmode="decimal" aria-label="'+esc(title+' '+label+' '+headers[j])+'" value="'+esc(val)+'">');
-}});
+let html='<div class="dailyHero"><div><strong>오늘의 사육 기록</strong><div><span>'+esc(d)+' · 입력한 수치는 자동으로 누계와 생산성적에 연결됩니다.</span></div></div><span>새솔 GP</span></div>';
+html+='<div class="dailyControls"><label for="giltPurchaseType"><b>후보돈 입식 유형</b></label><select id="giltPurchaseType"><option value="external">GGP 외부 구매</option><option value="internal">자체 생산 F1 후보돈 편입</option></select><span class="note">자체 F1 편입은 육성돈 재고에서 차감됩니다.</span></div>';
+html+='<div class="dailyCards">';
+const inputCell=(id,title,label,header)=>'<input class="xlsInput" data-cell="'+id+'" inputmode="decimal" aria-label="'+esc(title+' '+label+' '+header)+'" value="'+esc(saved[id]??'')+'">';
+sections.forEach(([row,col,title,headers,labels])=>{
+ const wide=headers.length>4;
+ html+='<section class="dailyCard'+(wide?' wide':'')+'"><div class="dailyCardHead"><span class="dailyCardNum">'+esc(title.split(/[ ,]/)[0])+'</span><span class="dailyCardTitle">'+esc(title.replace(/^\\d+[,. ]*/,''))+'</span></div><div class="dailyTableWrap"><table class="dailyTable"><thead><tr>'+headers.map(h=>'<th>'+esc(h)+'</th>').join('')+'</tr></thead><tbody>';
+ labels.forEach((label,i)=>{html+='<tr><th>'+esc(label)+'</th>';for(let j=1;j<headers.length;j++){const id=(row+1+i)+'_'+(col+j);html+='<td>'+inputCell(id,title,label,headers[j])+'</td>'}html+='</tr>'});
+ html+='</tbody></table></div></section>';
 });
-html+='<div class="xlsCell xlsTitle xlsWide" style="grid-row:23">특이사항</div><div style="grid-row:24/span 7;grid-column:13/span 7"><textarea id="sheetMemo" style="width:100%;height:100%;resize:vertical;border:1px solid #d5dce3;padding:8px">'+esc(saved.memo||'')+'</textarea></div>';
-html+='</div><p class="note">노란 칸에 입력하면 소계가 자동 계산됩니다. 11월 2일부터 전일재고는 전날 저장한 당일재고를 자동으로 불러오며 수정할 수 없습니다. 11월 1일 전일재고는 10월 31일 원본 일보 마감재고(3,690두)를 자동 적용합니다. 저장 시 공동 DB에 보관됩니다.</p>';
+html+='<section class="dailyCard wide"><div class="dailyCardHead"><span class="dailyCardTitle">📝 특이사항</span></div><div style="padding:15px"><textarea id="sheetMemo" class="dailyMemo" placeholder="오늘 특이사항을 기록해 주세요">'+esc(saved.memo||'')+'</textarea></div></section></div>';
+html+='<div class="sheetActions"><button type="button" class="btn2" id="sheetExport">CSV 내보내기</button><button type="button" class="btn" id="sheetSave">사육일보 저장</button></div>';
+html+='<p class="note">연한 초록색은 자동 계산 항목입니다. 전일재고는 전날 마감재고를 자동으로 가져옵니다.</p>';
 el.innerHTML=html;
 const purchaseType=document.getElementById('giltPurchaseType');purchaseType.value=saved.gilt_purchase_type||'external';purchaseType.addEventListener('change',()=>totals());
 const get=(r,c)=>el.querySelector('[data-cell="'+r+'_'+c+'"]');
