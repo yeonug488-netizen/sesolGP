@@ -40,6 +40,8 @@ const st=document.createElement('style');st.textContent=`
 const esc=x=>String(x??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;');
 const getDate=()=>document.getElementById('dDate').value;
 const key=d=>'sesolGP:dailySheet:'+d;
+// 이전 버전에서 남긴 테스트용 로컬 복사본 정리
+try{for(let i=localStorage.length-1;i>=0;i--){const k=localStorage.key(i);if(k&&k.startsWith('sesolGP:dailySheet:'))localStorage.removeItem(k)}}catch(e){}
 function render(){
 let el=document.getElementById('originalTables');if(!el)return;
 let d=getDate(),saved={};let record=window.daily?.find(x=>x.report_date===d);if(record?.sheet_data)saved=record.sheet_data; // 공동 DB만 진실의 원천: 삭제된 테스트 자료를 브라우저 캐시에서 복원하지 않음
@@ -207,7 +209,7 @@ document.getElementById('sheetSave').onclick=async()=>{
  updated_at:new Date().toISOString()};
  const res=await fetch('https://lmjubklvkstkmwywpmth.supabase.co/rest/v1/daily_reports?on_conflict=report_date',{method:'POST',headers:{apikey:'sb_publishable_3p5fYCKSGbWIB7V4vd8qzg_q0E7VzF2',Authorization:'Bearer sb_publishable_3p5fYCKSGbWIB7V4vd8qzg_q0E7VzF2','Content-Type':'application/json',Prefer:'resolution=merge-duplicates,return=minimal'},body:JSON.stringify(row)});
  if(!res.ok)return alert('공동 DB 저장 오류: '+(await res.text()).slice(0,180));
- localStorage.setItem(key(d),JSON.stringify(obj));
+ // 공동 DB만 저장하며 브라우저에 별도 복사본을 남기지 않는다.
  if(window.daily){const i=window.daily.findIndex(x=>x.report_date===d);if(i>=0)window.daily[i]={...window.daily[i],...row};else window.daily.push(row)}
  alert(d+' 일보 공동 DB 저장 완료');
 };
