@@ -52,7 +52,7 @@ sections.forEach(([row,col,title,headers,labels])=>{
  labels.forEach((label,i)=>{html+='<tr><th>'+esc(label)+'</th>';for(let j=1;j<headers.length;j++){const id=(row+1+i)+'_'+(col+j);html+='<td>'+inputCell(id,title,label,headers[j])+'</td>'}html+='</tr>'});
  html+='</tbody></table></div></section>';
 });
-html+='</div>';
+html+='</div><section class="dailyCard wide" style="margin-top:16px"><div class="dailyCardHead"><span class="dailyCardTitle">재고 계산 검증</span></div><div id="stockAudit" style="padding:14px 18px;font-size:13px;line-height:1.8"></div></section>';
 html+='<div class="sheetActions"><button type="button" class="btn2" id="sheetExport">CSV 내보내기</button><button type="button" class="btn" id="sheetSave">사육일보 저장</button></div>';
 html+='<p class="note">연한 초록색은 자동 계산 항목입니다. 전일재고는 전날 마감재고를 자동으로 가져옵니다.</p>';
 el.innerHTML=html;
@@ -99,6 +99,23 @@ function totals(){
  [9,()=>num(4,9)]
  ];
  put(30,11,num(28,11)+num(29,11));
+ // 모든 재고 항목의 계산 근거를 표시해 입력 오류와 과거 저장값을 식별한다.
+ const auditRows=[
+ ['후보돈',3,[['외부 구매',28,11,1],['자체 F1 편입',29,11,1],['폐사',8,3,-1],['후보돈 판매',28,3,-1]]],
+ ['모돈',4,[['폐사',8,4,-1],['도태(모돈) 판매',28,6,-1]]],
+ ['웅돈',5,[['폐사',8,5,-1],['도태(웅돈) 판매',28,7,-1]]],
+ ['포유자돈',6,[['분만 생존산자수',14,14,1],['폐사',8,6,-1],['이유 이동',34,3,-1]]],
+ ['이유자돈',7,[['포유에서 이동',34,3,1],['육성 이동',35,3,-1],['폐사',8,7,-1],['자돈 판매',28,4,-1]]],
+ ['육성돈',8,[['이유에서 이동',35,3,1],['폐사',8,8,-1],['비육돈 판매',28,5,-1],['자체 F1 편입',29,11,-1]]],
+ ['탈락돈',9,[]]
+ ];
+ const audit=document.getElementById('stockAudit');
+ if(audit)audit.innerHTML=auditRows.map(([name,col,changes])=>{
+  const start=get(4,col)?.value;
+  const parts=changes.filter(([,r,c])=>num(r,c)!==0).map(([label,r,c,sign])=>(sign>0?' + ':' − ')+num(r,c)+' ('+label+')');
+  const expected=start===''?'전일재고 없음':String(Number(start)+changes.reduce((s,[,r,c,sign])=>s+sign*num(r,c),0));
+  return '<div style="border-bottom:1px solid #edf0f2;padding:5px 0"><b>'+name+'</b>: '+(start===''?'미확정':start)+parts.join('')+' = <b>'+expected+'두</b></div>';
+ }).join('')+'<div style="margin-top:8px;color:#64748b">입력값을 바꾸면 계산식도 즉시 갱신됩니다. 예상하지 못한 감소가 있으면 괄호 안의 항목을 확인해 주세요.</div>';
  // 이전 날짜의 재고가 아직 없으면 임의로 재고를 산출하지 않는다.
  if(Array.from({length:7},(_,i)=>get(4,i+3)).every(x=>x&&x.value!=='')){
   for(const [c,fn] of formulas)put(5,c,fn());
