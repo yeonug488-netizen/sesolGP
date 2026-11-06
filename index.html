@@ -48,7 +48,7 @@ function totals(){
   const prev=window.daily?.find(x=>x.report_date===pd)?.sheet_data;
   for(let c=3;c<=9;c++){
    const x=get(4,c);if(!x)continue;
-   x.value=prev&&prev['5_'+c]!==undefined?String(prev['5_'+c]):'';
+   x.value=prev&&prev['5_'+c]!==undefined&&prev['5_'+c]!==''?String(prev['5_'+c]):'';x.placeholder=x.value===''?'전일 자료 없음':'';
    x.readOnly=true;x.style.background='#e6f2eb';
   }
  }else if(d==='2026-11-01'){
@@ -134,7 +134,7 @@ totals();
  }catch(e){console.warn('월 누계 조회 실패',e)}})();
 document.getElementById('sheetSave').onclick=async()=>{
  if(!d||d<'2026-11-01')return alert('11월 1일 이후 날짜를 선택해줘');
- totals();const obj={memo:document.getElementById('sheetMemo').value,gilt_purchase_type:purchaseType.value};
+ totals();if(Array.from({length:7},(_,i)=>get(4,i+3)).some(x=>!x||x.value===''))return alert('전날 사육일보의 당일재고가 없어 저장할 수 없습니다. 전날 일보를 먼저 저장해 주세요.');const obj={memo:document.getElementById('sheetMemo').value,gilt_purchase_type:purchaseType.value};
  el.querySelectorAll('[data-cell]').forEach(x=>obj[x.dataset.cell]=x.value);
  const row={report_date:d,sheet_data:obj,memo:obj.memo,
  breeding_stock:num(5,3)+num(5,4)+num(5,5),
