@@ -60,22 +60,34 @@ const purchaseType={value:'split'};
 const get=(r,c)=>el.querySelector('[data-cell="'+r+'_'+c+'"]');
 const num=(r,c)=>Number(get(r,c)?.value||0);
 const put=(r,c,v)=>{const x=get(r,c);if(x){x.value=String(v);x.readOnly=true;x.style.background='#e6f2eb'}};
+// 저장된 당일재고는 과거 수식으로 계산됐을 수 있으므로 사용하지 않는다.
+// 10/31 확정재고에서 각 날짜의 원본 입출고를 순서대로 재계산한다.
+function previousClosing(date){
+ const balance=[72,473,9,812,1424,900,0];
+ const end=new Date(date+'T12:00:00');
+ for(let day=new Date('2026-11-01T12:00:00');day<end;day.setDate(day.getDate()+1)){
+  const ds=day.toISOString().slice(0,10);
+  const data=window.daily?.find(x=>x.report_date===ds)?.sheet_data;
+  if(!data)return null;
+  const n=(r,c)=>Number(data[r+'_'+c]||0);
+  balance[0]+=n(28,11)+n(29,11)-n(8,3);
+  balance[1]-=n(8,4)+n(28,6);
+  balance[2]-=n(8,5)+n(28,7);
+  balance[3]+=n(14,14)-n(8,6)-n(34,3);
+  balance[4]+=n(34,3)-n(35,3)-n(8,7)-n(28,4);
+  balance[5]+=n(35,3)-n(8,8)-n(28,3)-n(28,5)-n(29,11);
+ }
+ return balance;
+}
 function totals(){
  el.dataset.negativeStock='';
  // 전일재고는 직전 날짜의 저장된 당일재고를 자동 승계한다.
- if(d>='2026-11-02'){
-  const prior=new Date(d+'T12:00:00');prior.setDate(prior.getDate()-1);
-  const pd=prior.toISOString().slice(0,10);
-  const prev=window.daily?.find(x=>x.report_date===pd)?.sheet_data;
-  for(let c=3;c<=9;c++){
-   const x=get(4,c);if(!x)continue;
-   x.value=prev&&prev['5_'+c]!==undefined&&prev['5_'+c]!==''?String(prev['5_'+c]):'';x.placeholder=x.value===''?'전일 자료 없음':'';
-   x.readOnly=true;x.style.background='#e6f2eb';
-  }
- }else if(d==='2026-11-01'){
-  // 2026-10-31 원본 엑셀 '31' 시트의 당일재고 C5:I5 확정값.
-  const closing=[72,473,9,812,1424,900,0];
-  for(let c=3;c<=9;c++){const x=get(4,c);if(x){x.value=String(closing[c-3]);x.readOnly=true;x.style.background='#e6f2eb'}}
+ const closing=previousClosing(d);
+ for(let c=3;c<=9;c++){
+  const x=get(4,c);if(!x)continue;
+  x.value=closing?String(closing[c-3]):'';
+  x.placeholder=closing?'':'이전 일보 미저장';
+  x.readOnly=true;x.style.background='#e6f2eb';
  }
  for(const [r,c] of [[3,2],[7,2]]){
   const count=r===3?8:7;
