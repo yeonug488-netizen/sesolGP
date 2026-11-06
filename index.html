@@ -369,7 +369,7 @@ function renderMonthlySales(){
  $a('monthlySalesHead').innerHTML='<tr><th>구분</th>'+header+'<th>합계</th></tr>';
  const cull=months.map(m=>{if(chosen===2026&&Object.hasOwn(historicalCull2026,m))return historicalCull2026[m];const matching=data.filter(r=>Number(r.date.slice(0,4))===chosen&&Number(r.date.slice(5,7))===m&&r.sale_cull_sow!==undefined);return matching.length?matching.reduce((a,r)=>a+n(r.sale_cull_sow),0):null;});
  const boarCull=months.map(m=>{const matching=data.filter(r=>Number(r.date.slice(0,4))===chosen&&Number(r.date.slice(5,7))===m&&r.sale_cull_boar!==undefined);return matching.length?matching.reduce((a,r)=>a+n(r.sale_cull_boar),0):null;});
- const categories=[['후보돈 판매','sale_f1'],['자돈 판매','sale_piglets'],['비육돈 판매','sale_fattening']];
+ const categories=[['후보돈','sale_f1'],['자돈','sale_piglets'],['비육돈','sale_fattening']];
  const totals=Array(12).fill(0),seen=Array(12).fill(false);
  const rowsHtml=categories.map(([label,key])=>{
   const values=Array(12).fill(0);
@@ -378,7 +378,7 @@ function renderMonthlySales(){
   values.forEach((v,i)=>totals[i]+=v);
   return '<tr><th>'+label+'</th>'+values.map((v,i)=>'<td>'+(seen[i]?v.toLocaleString():'자료없음')+'</td>').join('')+'<td><strong>'+values.reduce((a,b)=>a+b,0).toLocaleString()+'</strong></td></tr>';
  });
- rowsHtml.push('<tr><th>모돈도태 판매</th>'+cull.map(v=>'<td>'+(v===null?'자료없음':v.toLocaleString())+'</td>').join('')+'<td><strong>'+cull.filter(v=>v!==null).reduce((a,b)=>a+b,0).toLocaleString()+'</strong></td></tr>');
+ rowsHtml.push('<tr><th>모돈도태</th>'+cull.map(v=>'<td>'+(v===null?'자료없음':v.toLocaleString())+'</td>').join('')+'<td><strong>'+cull.filter(v=>v!==null).reduce((a,b)=>a+b,0).toLocaleString()+'</strong></td></tr>');
  cull.forEach((v,i)=>{if(v!==null){totals[i]+=v;seen[i]=true;}});
  rowsHtml.push('<tr><th>합계</th>'+totals.map((v,i)=>'<td><strong>'+(seen[i]?v.toLocaleString():'자료없음')+'</strong></td>').join('')+'<td><strong>'+totals.reduce((a,b)=>a+b,0).toLocaleString()+'</strong></td></tr>');
  $a('monthlySalesBody').innerHTML=rowsHtml.join('');
