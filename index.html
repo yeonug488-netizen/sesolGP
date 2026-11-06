@@ -65,7 +65,7 @@ function totals(){
  // 수태율 R8은 금주 수태/교배이며, 원본의 비율 셀은 누계 합산 대상이 아니다.
  const rate=get(8,18);if(rate){rate.value=num(5,18)?String((num(6,18)/num(5,18)*100).toFixed(1)):'';rate.readOnly=true}
  // 분만 평균은 총산자수/분만복수
- for(const [r,top] of [[20,13],[21,14]]{const x=get(r,14);if(x){x.value=num(12,14)?String((num(top,14)/num(12,14)).toFixed(2)):'';x.readOnly=true}}
+ for(const [r,top] of [[20,13],[21,14]]){const x=get(r,14);if(x){x.value=num(12,14)?String((num(top,14)/num(12,14)).toFixed(2)):'';x.readOnly=true}}
  // 원본 엑셀 C5:I5 당일재고 수식을 동일한 전입·전출 기준으로 적용
  const formulas=[
  [3,()=>num(4,3)+num(24,9)-num(8,3)+num(20,18)-num(20,19)-num(5,14)],
