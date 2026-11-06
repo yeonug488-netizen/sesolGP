@@ -45,7 +45,7 @@ let d=getDate(),saved={};try{saved=JSON.parse(localStorage.getItem(key(d))||'{}'
 if(saved.gilt_purchase_type==='internal'&&saved['29_11']===undefined){saved['29_11']=saved['28_11']||'0';saved['28_11']='0'}
 let html='<div class="dailyHero"><div><strong>오늘의 사육 기록</strong><div><span>'+esc(d)+' · 입력한 수치는 자동으로 누계와 생산성적에 연결됩니다.</span></div></div><span>새솔 GP</span></div>';
 html+='<div class="dailyCards">';
-const inputCell=(id,title,label,header)=>'<input class="xlsInput" data-cell="'+id+'" inputmode="decimal" aria-label="'+esc(title+' '+label+' '+header)+'" value="'+esc(saved[id]??'')+'"'+(id.startsWith('4_')?' readonly tabindex="-1" title="전일 마감재고 자동 승계 (수정 불가)"':'')+'>';
+const inputCell=(id,title,label,header)=>'<input class="xlsInput" data-cell="'+id+'" inputmode="decimal" aria-label="'+esc(title+' '+label+' '+header)+'" value="'+esc(saved[id]??'')+'"'+((id.startsWith('4_')||id.startsWith('5_'))?' readonly tabindex="-1" title="사육두수는 입출고 기록으로만 자동 계산됩니다"':'')+'>';
 sections.forEach(([row,col,title,headers,labels])=>{
  const wide=headers.length>4;
  html+='<section class="dailyCard'+(wide?' wide':'')+'"><div class="dailyCardHead"><span class="dailyCardNum">'+esc(title.split(/[ ,]/)[0])+'</span><span class="dailyCardTitle">'+esc(title.replace(/^[0-9]+[,. ]*/,''))+'</span></div><div class="dailyTableWrap"><table class="dailyTable"><thead><tr>'+headers.map(h=>'<th>'+esc(h)+'</th>').join('')+'</tr></thead><tbody>';
@@ -61,6 +61,7 @@ const get=(r,c)=>el.querySelector('[data-cell="'+r+'_'+c+'"]');
 const num=(r,c)=>Number(get(r,c)?.value||0);
 const put=(r,c,v)=>{const x=get(r,c);if(x){x.value=String(v);x.readOnly=true;x.style.background='#e6f2eb'}};
 function totals(){
+ el.dataset.negativeStock='';
  // 전일재고는 직전 날짜의 저장된 당일재고를 자동 승계한다.
  if(d>='2026-11-02'){
   const prior=new Date(d+'T12:00:00');prior.setDate(prior.getDate()-1);
