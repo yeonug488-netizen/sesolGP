@@ -9,8 +9,7 @@ const sections=[
 [27,8,'5,구매두수',['구 분','후보돈'],['당  일','월 누 계']],
 [4,13,'6 교배현황',['구분','당일','월누계'],['후보돈','경산돈','재발돈','소 계']],
 [4,17,'7 수태현황',['구분','금주','월누계'],['교 배','수 태','재발/미임','소 계']],
-[11,13,'8 분만현황',['구분','금주','월누계'],['분만복수','총산자수','생존산자수','사 산','미 이 라','사 고','평총산자수','평생존산자수']],
-[11,17,'9 작업내용',['구분','전 입','전 출'],['교배사','임신사','분만사','분자돈','자돈사','육성사','후보돈','탈락돈']]
+[11,13,'8 분만현황',['구분','금주','월누계'],['분만복수','총산자수','생존산자수','사 산','미 이 라','사 고','평총산자수','평생존산자수']]
 ];
 const st=document.createElement('style');st.textContent='#originalTables{overflow:auto}.xlsGrid{display:grid;grid-template-columns:repeat(19,minmax(72px,1fr));grid-template-rows:repeat(32,32px);min-width:1490px;background:#fff;border:1px solid #adb6c0}.xlsCell{border:1px solid #d5dce3;display:flex;align-items:center;justify-content:center;font-size:12px;white-space:nowrap;min-width:0}.xlsTitle{background:#dce9f2;font-weight:800}.xlsHead{background:#eff4f7;font-weight:700}.xlsInput{width:100%;height:100%;border:0;outline:0;text-align:center;font:inherit;background:#fffdf1;min-width:0}.xlsInput:focus{background:#fff0bc;box-shadow:inset 0 0 0 2px #2563eb}.xlsWide{grid-column:13/span 7}.sheetActions{display:flex;gap:8px;justify-content:flex-end;margin:10px 0}';document.head.appendChild(st);
 const esc=x=>String(x??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;');
