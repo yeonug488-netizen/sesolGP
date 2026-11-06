@@ -29,6 +29,7 @@ const st=document.createElement('style');st.textContent=`
 .dailyTable .xlsInput{width:100%;min-width:55px;max-width:120px;box-sizing:border-box;border:1px solid #dbe3eb;border-radius:8px;background:#fff;padding:9px 4px;font-size:13px;text-align:center;outline:none}
 .dailyTable .xlsInput:focus{border-color:#10a37f;box-shadow:0 0 0 3px #10a37f22;background:#fff}
 .dailyTable .xlsInput[readonly]{background:#eef6f3;color:#28614e;border-color:#deebe5}
+.dailyTable .xlsInput[data-cell="5_14"],.dailyTable .xlsInput[data-cell="5_18"]{background:#fff!important;color:#111!important;border-color:#cddfd7!important}
 .dailyTable td:last-child .xlsInput{font-weight:800}
 .dailyControls{display:flex;flex-wrap:wrap;align-items:center;gap:12px;margin:0 0 15px;padding:14px 17px;border-radius:13px;background:#f5f9f7;border:1px solid #e0eee6}
 .dailyControls select{border:1px solid #cddfd7;border-radius:8px;padding:9px;background:white;max-width:100%}
@@ -81,6 +82,11 @@ function previousClosing(date){
 }
 function totals(){
  el.dataset.negativeStock='';
+ // 교배 후보돈과 수태현황 교배는 반드시 입력 가능하게 유지한다.
+ for(const id of ['5_14','5_18']){
+  const field=el.querySelector('[data-cell="'+id+'"]');
+  if(field){field.readOnly=false;field.removeAttribute('readonly');field.removeAttribute('tabindex');field.style.background='#fff';field.style.color='';field.title='직접 입력 가능';}
+ }
  // 전일재고는 직전 날짜의 저장된 당일재고를 자동 승계한다.
  const closing=previousClosing(d);
  for(let c=3;c<=9;c++){
