@@ -12,8 +12,8 @@ function openDate(d){if(!isDateAllowed(d))return alert(firstUnfilledDate()+' 일
 (function(){
 const sections=[
 [3,2,'1,사육두수',['구분','후보돈','모돈','웅돈','포유자돈','이유자돈','육성돈','탈락돈','소 계'],['전일재고','당일재고']],
-[7,2,'2,도폐사두수',['구분','후보돈','모돈','웅돈','포유자돈','이유자돈','육성돈'],['당  일','월 누 계']],
-[27,2,'3,판매두수',['구 분','후보돈','자돈','비육돈','모돈도태','웅돈도태'],['당  일','월 누 계']],
+[7,2,'2,폐사현황',['구분','후보돈','모돈','웅돈','포유자돈','이유자돈','육성돈','합계'],['당  일','월 누 계']],
+[27,2,'3,판매두수',['구 분','후보돈','자돈','비육돈','모돈도태','웅돈도태','합계'],['당  일','월 누 계']],
 [27,10,'4,구매두수',['구 분','후보돈'],['외부 구매','자체 F1 편입','당일 합계','월 누 계']],
 [4,13,'5 교배현황',['구분','당일','월누계'],['후보돈','경산돈','재발돈','소 계']],
 [4,17,'6 수태현황',['구분','금주','월누계'],['교 배','수 태','재발/미임','소 계']],
@@ -120,6 +120,10 @@ function totals(){
   const count=r===3?8:7;
   for(let i=1;i<=2;i++){let rr=r+i;if(r===3)put(rr,c+count,Array.from({length:count-1},(_,j)=>num(rr,c+j+1)).reduce((a,b)=>a+b,0))}
  }
+ // 폐사 및 판매 합계 자동 계산.
+ for(const [r,cols,totalCol] of [[8,6,9],[9,6,9],[28,5,8],[29,5,8]]){
+  put(r,totalCol,Array.from({length:cols},(_,i)=>num(r,3+i)).reduce((a,b)=>a+b,0));
+ }
  // 교배 소계는 N5:N7의 합. O열은 당일 교배의 월 누계.
  put(8,14,num(5,14)+num(6,14)+num(7,14));
  // 수태율 R8은 금주 수태/교배이며, 원본의 비율 셀은 누계 합산 대상이 아니다.
@@ -192,6 +196,9 @@ function totals(){
   }
   x.readOnly=true;x.style.background='#e6f2eb';
  }
+ // 월 누계 갱신 후 합계 재계산.
+ put(9,9,Array.from({length:6},(_,i)=>num(9,3+i)).reduce((a,b)=>a+b,0));
+ put(29,8,Array.from({length:5},(_,i)=>num(29,3+i)).reduce((a,b)=>a+b,0));
  // 수태율 월 누계는 누적 수태/누적 교배 비율이다.
  const monthlyRate=get(8,19);
  if(monthlyRate){monthlyRate.value=num(5,19)?String((100*num(6,19)/num(5,19)).toFixed(1)):'';monthlyRate.readOnly=true}
