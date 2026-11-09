@@ -243,7 +243,15 @@ document.getElementById('sheetSave').onclick=async()=>{
 };
 document.getElementById('sheetExport').onclick=()=>{if(!d)return alert('날짜를 선택해줘');const data=[['날짜','셀','값'],...Array.from(el.querySelectorAll('[data-cell]')).map(x=>[d,x.dataset.cell,x.value]),[d,'특이사항',saved.memo||'']];const csv='\uFEFF'+data.map(a=>a.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(',')).join('\r\n');const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));a.download=d+'-사육일보.csv';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000)};
 }
-document.addEventListener('click',e=>{if(e.target.closest('.dateBtn,.tab'))setTimeout(render,0)});document.getElementById('dDate').addEventListener('change',()=>{const field=document.getElementById('dDate'),d=field.value;if(!isDateAllowed(d)){alert(firstUnfilledDate()+' 일보를 먼저 저장해야 합니다.');field.value=firstUnfilledDate();}document.getElementById('monthPick').value=field.value.slice(0,7);render();});
+// 입력 중 화면 전체를 다시 그리면 숫자와 포커스가 사라진다.
+ // 날짜 전환 때만 시트를 새로 만들고, 일반 클릭·탭 이동은 입력 DOM을 유지한다.
+ document.addEventListener('click',e=>{
+   const dateButton=e.target.closest('.dateBtn');
+   if(dateButton && !dateButton.disabled){
+     const date=dateButton.dataset.date;
+     if(date && date!==getDate()) {document.getElementById('dDate').value=date;render();}
+   }
+ });document.getElementById('dDate').addEventListener('change',()=>{const field=document.getElementById('dDate'),d=field.value;if(!isDateAllowed(d)){alert(firstUnfilledDate()+' 일보를 먼저 저장해야 합니다.');field.value=firstUnfilledDate();}document.getElementById('monthPick').value=field.value.slice(0,7);render();});
 try{render();}catch(e){const x=document.getElementById('dailyFormError');if(x)x.textContent='사육일보 표시 오류: '+e.message;console.error('사육일보 표시 오류',e);}
 if(location.hash==='#analytics'){document.querySelector('[data-page="analytics"]').click();}
 })();
