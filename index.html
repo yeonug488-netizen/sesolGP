@@ -218,7 +218,8 @@ totals();
  if(!res.ok)return;
  const entries=await res.json();if(!window.daily)window.daily=[];
  for(const entry of entries){const i=window.daily.findIndex(x=>x.report_date===entry.report_date);if(i>=0)window.daily[i]={...window.daily[i],...entry};else window.daily.push(entry)}
- if(document.getElementById('dDate').value===d&&document.getElementById('originalTables')===el)render();
+ // 이미 표시된 입력표를 비동기 조회 후 다시 그리지 않는다. 미저장 입력값 유실과 반복 조회 방지.
+ // 날짜를 바꾸거나 다시 열면 공동 DB의 최신 자료가 반영된다.
  }catch(e){console.warn('월 누계 조회 실패',e)}})();
 document.getElementById('sheetSave').onclick=async()=>{
  if(!d||d<'2026-11-01')return alert('11월 1일 이후 날짜를 선택해줘');
