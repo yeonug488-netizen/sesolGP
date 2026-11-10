@@ -1,0 +1,51 @@
+name: Encrypted daily Supabase backup
+on:
+  schedule:
+    - cron: '10 17 * * *' # 02:10 Asia/Seoul
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Check required secrets
+        env:
+          DB_URL: ${{ secrets.SUPABASE_BACKUP_DB_URL }}
+          PASSWORD: ${{ secrets.BACKUP_ENCRYPTION_PASSWORD }}
+        run: |
+          test -n "$DB_URL" || { echo "::error::Set SUPABASE_BACKUP_DB_URL repository secret"; exit 1; }
+          test -n "$PASSWORD" || { echo "::error::Set BACKUP_ENCRYPTION_PASSWORD repository secret"; exit 1; }
+      - name: Install PostgreSQL client
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq postgresql-client
+      - name: Create and encrypt backup
+        env:
+          DB_URL: ${{ secrets.SUPABASE_BACKUP_DB_URL }}
+          PASSWORD: ${{ secrets.BACKUP_ENCRYPTION_PASSWORD }}
+        run: |
+          set -euo pipefail
+          mkdir -p backup
+          FILE="backup/sesolgp-$(date -u +%Y%m%dT%H%M%SZ).dump"
+          pg_dump "$DB_URL" --format=custom --no-owner --no-acl --file="$FILE"
+          test -s "$FILE"
+          pg_restore --list "$FILE" > backup/manifest.txt
+          test -s backup/manifest.txt
+          openssl enc -aes-256-cbc -pbkdf2 -iter 200000 -salt -in "$FILE" -out "$FILE.enc" -pass env:PASSWORD
+          openssl enc -d -aes-256-cbc -pbkdf2 -iter 200000 -in "$FILE.enc" -out backup/verification.dump -pass env:PASSWORD
+          cmp "$FILE" backup/verification.dump
+          sha256sum "$FILE.enc" > backup/SHA256SUMS
+          rm -f "$FILE" backup/verification.dump
+          echo "Encrypted database backup and decrypt verification succeeded."
+      - name: Upload encrypted backup
+        uses: actions/upload-artifact@v4
+        with:
+          name: sesolgp-db-${{ github.run_id }}
+          path: |
+            backup/*.enc
+            backup/SHA256SUMS
+            backup/manifest.txt
+          retention-days: 30
+          if-no-files-found: error
