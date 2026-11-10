@@ -17,10 +17,6 @@ jobs:
         run: |
           test -n "$DB_URL" || { echo "::error::Set SUPABASE_BACKUP_DB_URL repository secret"; exit 1; }
           test -n "$PASSWORD" || { echo "::error::Set BACKUP_ENCRYPTION_PASSWORD repository secret"; exit 1; }
-      - name: Install PostgreSQL client
-        run: |
-          sudo apt-get update -qq
-          sudo apt-get install -y -qq postgresql-client
       - name: Create and encrypt backup
         env:
           DB_URL: ${{ secrets.SUPABASE_BACKUP_DB_URL }}
@@ -29,9 +25,9 @@ jobs:
           set -euo pipefail
           mkdir -p backup
           FILE="backup/sesolgp-$(date -u +%Y%m%dT%H%M%SZ).dump"
-          pg_dump "$DB_URL" --format=custom --no-owner --no-acl --file="$FILE"
+          docker run --rm -e DB_URL -v "$PWD/backup:/backup" postgres:17 bash -c 'pg_dump "$DB_URL" --format=custom --no-owner --no-acl --file="/backup/$(basename "$1")"' _ "$FILE"
           test -s "$FILE"
-          pg_restore --list "$FILE" > backup/manifest.txt
+          docker run --rm -v "$PWD/backup:/backup" postgres:17 pg_restore --list "/backup/$(basename "$FILE")" > backup/manifest.txt
           test -s backup/manifest.txt
           openssl enc -aes-256-cbc -pbkdf2 -iter 200000 -salt -in "$FILE" -out "$FILE.enc" -pass env:PASSWORD
           openssl enc -d -aes-256-cbc -pbkdf2 -iter 200000 -in "$FILE.enc" -out backup/verification.dump -pass env:PASSWORD
