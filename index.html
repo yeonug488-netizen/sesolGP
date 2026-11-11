@@ -5,10 +5,11 @@
  return d;
 }
 function isDateAllowed(d){return d>='2026-11-01'&&d<=firstUnfilledDate()}
+function isDailyLocked(d){return d>='2026-11-01'&&d<firstUnfilledDate()&&!!window.daily?.some(x=>x.report_date===d)}
 function renderDates(){let m=$('#monthPick').value||'2026-11';if(m<'2026-11'){m='2026-11';$('#monthPick').value=m}let dates=daily.filter(x=>x.report_date.startsWith(m)).map(x=>x.report_date);let last=new Date(Number(m.slice(0,4)),Number(m.slice(5,7)),0).getDate();for(let i=1;i<=last;i++)dates.push(m+'-'+String(i).padStart(2,'0'));dates=[...new Set(dates)].sort().reverse();$('#dateList').innerHTML=dates.map(d=>`<button class="dateBtn" data-date="${d}" ${isDateAllowed(d)?'':'disabled title="전날 일보를 먼저 저장해야 합니다"'}>${isDateAllowed(d)?'':'🔒 '}${d.slice(5).replace('-','월 ')}일</button>`).join('');/* 날짜 목록 클릭은 아래 공통 날짜 전환 핸들러에서 처리하여 입력표를 일관되게 갱신합니다. */}
 function openDate(d){if(!isDateAllowed(d))return alert(firstUnfilledDate()+' 일보를 먼저 입력하고 저장해야 다음 날짜로 넘어갈 수 있습니다.');$('#dDate').value=d;document.querySelectorAll('[data-d]').forEach(x=>x.value=x.tagName==='TEXTAREA'?'':'0');$$('.dateBtn').forEach(b=>b.classList.toggle('on',b.dataset.date===d));let r=daily.find(x=>x.report_date===d);if(!r){$('#dailyView').innerHTML=`<div class="panel"><h2>${d}</h2><p>날짜 목록은 준비됐습니다. 이 날짜의 공동 DB 자료는 아직 등록 전입니다.</p></div>`;return}let loss=N(r.cull_death)+N(r.suckling_loss)+N(r.weaning_loss)+N(r.growing_loss);$('#dailyView').innerHTML=`<div class="mini"><div class="stat">총 사육두수<b>${r.total_stock}</b></div><div class="stat">도폐사·사고<b>${loss}</b></div><div class="stat">분만<b>${r.farrowing}</b></div><div class="stat">판매<b>${r.sale}</b></div></div><br>`;let map={breeding:'breeding_stock',suckling:'suckling_pigs',weaned:'weaned_pigs',growing:'growing_pigs',death:'cull_death',suckLoss:'suckling_loss',weanLoss:'weaning_loss',growLoss:'growing_loss',mate:'mating',preg:'pregnancy',farrow:'farrowing',born:'total_born',live:'live_born',moveIn:'transfer_in',moveOut:'transfer_out',purchase:'purchase',sale:'sale',memo:'memo'};Object.entries(map).forEach(([k,f])=>{let x=document.querySelector(`[data-d="${k}"]`);if(x)x.value=r[f]??''})}$('#monthPick').onchange=renderDates;$('#dSave').onclick=async()=>{let d=$('#dDate').value;if(!d||d<'2026-11-01')return alert('11월 1일 이후 날짜를 선택해줘');
  if(!isDateAllowed(d))return alert(firstUnfilledDate()+' 일보를 먼저 저장해야 합니다.');
- if(!isDateAllowed(d))return alert(firstUnfilledDate()+' 일보를 먼저 저장해야 합니다.');let G=k=>{let x=document.querySelector(`[data-d="${k}"]`);return x?.tagName==='TEXTAREA'?x.value:N(x?.value)},row={report_date:d,breeding_stock:G('breeding'),suckling_pigs:G('suckling'),weaned_pigs:G('weaned'),growing_pigs:G('growing'),total_stock:G('breeding')+G('suckling')+G('weaned')+G('growing'),cull_death:G('death'),mating:G('mate'),pregnancy:G('preg'),farrowing:G('farrow'),total_born:G('born'),live_born:G('live'),suckling_loss:G('suckLoss'),weaning_loss:G('weanLoss'),growing_loss:G('growLoss'),purchase:G('purchase'),sale:G('sale'),transfer_in:G('moveIn'),transfer_out:G('moveOut'),memo:G('memo'),updated_at:new Date().toISOString()};let r=await req('daily_reports?on_conflict=report_date',{method:'POST',headers:{Prefer:'resolution=merge-duplicates,return=minimal'},body:JSON.stringify(row)});if(r.ok){alert('일보 저장됐어');await load();openDate(d)}else alert('저장 오류')};load();</script><script>
+ if(isDailyLocked(d))return alert(d+' 일보는 작성 완료되어 조회만 가능합니다.');let G=k=>{let x=document.querySelector(`[data-d="${k}"]`);return x?.tagName==='TEXTAREA'?x.value:N(x?.value)},row={report_date:d,breeding_stock:G('breeding'),suckling_pigs:G('suckling'),weaned_pigs:G('weaned'),growing_pigs:G('growing'),total_stock:G('breeding')+G('suckling')+G('weaned')+G('growing'),cull_death:G('death'),mating:G('mate'),pregnancy:G('preg'),farrowing:G('farrow'),total_born:G('born'),live_born:G('live'),suckling_loss:G('suckLoss'),weaning_loss:G('weanLoss'),growing_loss:G('growLoss'),purchase:G('purchase'),sale:G('sale'),transfer_in:G('moveIn'),transfer_out:G('moveOut'),memo:G('memo'),updated_at:new Date().toISOString()};let r=await req('daily_reports?on_conflict=report_date',{method:'POST',headers:{Prefer:'resolution=merge-duplicates,return=minimal'},body:JSON.stringify(row)});if(r.ok){alert('일보 저장됐어');await load();openDate(d)}else alert('저장 오류')};load();</script><script>
 (function(){
 const sections=[
 [3,2,'1,사육두수',['구분','후보돈','모돈','웅돈','포유자돈','이유자돈','육성돈','탈락돈','소 계'],['전일재고','당일재고']],
@@ -80,6 +81,11 @@ html+='</div><section class="dailyCard wide" style="margin-top:16px"><div class=
 html+='<div class="sheetActions"><button type="button" class="btn2" id="sheetExport">CSV 내보내기</button><button type="button" class="btn" id="sheetSave">사육일보 저장</button></div>';
 html+='<p class="note">연한 초록색은 자동 계산 항목입니다. 전일재고는 전날 마감재고를 자동으로 가져옵니다.</p>';
 el.innerHTML=html;
+if(isDailyLocked(d)){
+ const saveBtn=el.querySelector('#sheetSave');if(saveBtn){saveBtn.disabled=true;saveBtn.textContent='🔒 작성 완료 · 수정 불가';saveBtn.title='작성 완료된 일보는 조회만 가능합니다.';}
+ el.querySelectorAll('input,textarea,select').forEach(x=>{x.readOnly=true;x.disabled=true;});
+ const banner=document.createElement('div');banner.className='dailyHero';banner.textContent='🔒 '+d+' 사육일보는 작성 완료되어 조회만 가능합니다.';el.prepend(banner);
+}
 const purchaseType={value:'split'};
 const get=(r,c)=>el.querySelector('[data-cell="'+r+'_'+c+'"]');
 const getFarrowSex=key=>{const v=el.querySelector('[data-cell="'+key+'"]')?.value;return v===''||v===undefined?null:Number(v)};
@@ -225,6 +231,7 @@ totals();
  // 날짜를 바꾸거나 다시 열면 공동 DB의 최신 자료가 반영된다.
  }catch(e){console.warn('월 누계 조회 실패',e)}})();
 document.getElementById('sheetSave').onclick=async()=>{
+ if(isDailyLocked(d))return alert(d+' 일보는 작성 완료되어 수정할 수 없습니다.');
  if(!d||d<'2026-11-01')return alert('11월 1일 이후 날짜를 선택해줘');
  totals();const female=getFarrowSex('farrow_female'),castrated=getFarrowSex('farrow_castrated');if((female!==null||castrated!==null)&&((female===null||castrated===null)||female+castrated!==num(14,14)))return alert('분만 암·거세 두수의 합계가 생존산자수와 일치해야 합니다.');if(el.dataset.negativeStock)return alert('재고가 음수입니다: '+el.dataset.negativeStock+'\\n판매·폐사·편입 수량을 확인해 주세요.');if(Array.from({length:7},(_,i)=>get(4,i+3)).some(x=>!x||x.value===''))return alert('전날 사육일보의 당일재고가 없어 저장할 수 없습니다. 전날 일보를 먼저 저장해 주세요.');const obj={memo:saved.memo||'',gilt_purchase_type:'split'};
  el.querySelectorAll('[data-cell]').forEach(x=>obj[x.dataset.cell]=x.value);
