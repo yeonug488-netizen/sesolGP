@@ -1,0 +1,47 @@
+<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>판매정산서 | 새솔GP 경영관리</title><style>
+*{box-sizing:border-box}body{margin:0;background:#f4f6fa;color:#17233b;font:15px/1.55 system-ui,'Malgun Gothic',sans-serif}header{background:#172b4d;color:white;padding:20px 4%}h1{margin:0;font-size:24px}main{max-width:1100px;margin:20px auto;padding:0 16px}.panel{background:white;border:1px solid #dfe5ec;border-radius:10px;padding:20px;margin:0 0 16px}.nav{display:flex;gap:8px;flex-wrap:wrap}.nav a{color:#17385f;background:#e9eef5;border-radius:7px;padding:9px 12px;text-decoration:none}h2{margin:0 0 14px;font-size:20px}.grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}label{display:block;font-size:13px;font-weight:650;color:#45556c}input,select,textarea{display:block;width:100%;margin-top:5px;border:1px solid #ccd5df;border-radius:6px;padding:9px;font:inherit;background:white}textarea{min-height:65px}.wide{grid-column:span 2}.full{grid-column:1/-1}.buttons{display:flex;gap:8px;flex-wrap:wrap;margin:14px 0}button{background:#215bb2;color:white;border:0;border-radius:7px;padding:11px 18px;cursor:pointer;font:inherit}.secondary{background:#e9eef5;color:#17233b}.document{border:2px solid #1d2d44;padding:34px 42px;margin:15px auto;max-width:850px;background:white}.document h2{text-align:center;font-size:27px;letter-spacing:3px;margin:4px 0 28px}.document table{border-collapse:collapse;width:100%;margin:12px 0 22px}.document th,.document td{border:1px solid #9eabb8;padding:12px;text-align:left}.document th{background:#f2f5f9;width:22%}.document td{width:28%}.document .right{text-align:right}.document .sum{font-size:22px;font-weight:800}.document .foot{margin-top:35px;text-align:center;font-weight:700}.hint{font-size:12px;color:#68788d}#records{display:flex;gap:8px;flex-wrap:wrap}#records button{padding:7px 10px} @media(max-width:700px){.grid{grid-template-columns:repeat(2,minmax(0,1fr))}.document{padding:14px}.document th,.document td{padding:6px;font-size:12px}}@page{size:A4 portrait;margin:15mm}@media print{body{background:white}header,.no-print{display:none!important}main{padding:0;margin:0;max-width:none}.panel{border:0;padding:0;margin:0}.document{border:0;padding:0;margin:0;max-width:none}.document h2{margin-top:25px}.document th{background:#f2f5f9!important;print-color-adjust:exact;-webkit-print-color-adjust:exact}}
+</style></head><body><header><h1>새솔GP 경영관리 · 판매정산서</h1></header><main><nav class="panel nav no-print"><a href="./">자금지출계획</a><a href="./manure.html?tab=manure">가축분뇨관리대장</a><a href="./manure.html?tab=compost">퇴비대장</a><a href="./manure.html?tab=facility">정화처리시설 관리일지</a><a href="./settlements.html">판매정산서</a></nav>
+<section class="panel no-print"><h2>판매정산서 작성</h2><div class="grid">
+<label>정산서 종류<select id="kind"><option value="gilt">후보돈 판매 정산서</option><option value="piglet">자돈 판매 정산서</option></select></label>
+<label>판매일<input type="date" id="date"></label><label class="wide">구매처<input id="buyer" placeholder="구매처명"></label>
+<label>판매두수 (두)<input type="number" min="0" step="1" id="count" value="0"></label>
+<label>판매단가 (원/두)<input type="number" min="0" step="1" id="unit" value="560000"></label>
+<label>기준중량 (kg/두)<input type="number" min="0" step=".01" id="baseWeight" value="90"></label>
+<label>실중량 (kg, 전체)<input type="number" min="0" step=".01" id="weight" value="0"></label>
+<label>증체단가 (원/kg)<input type="number" min="0" step="1" id="gainUnit" value="3000"></label>
+<label>입금은행<input id="bank" value="우체국"></label>
+<label class="wide">입금계좌<input id="account" value="100-0000-05044"></label>
+<label class="wide">예금주<input id="owner" value="농업회사법인 주식회사 새솔"></label>
+<label class="full">판매조건<textarea id="terms">90kg 기준 증체비 kg당 3,000원</textarea></label>
+<label class="full">비고<textarea id="memo"></textarea></label>
+</div><div class="buttons"><button id="save">정산서 저장</button><button id="new" class="secondary">새 정산서</button><button id="print">인쇄 / PDF 저장</button><button id="remove" class="secondary">현재 정산서 삭제</button></div><div id="status" class="hint"></div></section>
+<section class="panel no-print"><h2>저장된 정산서</h2><div id="records"></div><p class="hint">정산서는 현재 사용하는 브라우저에 저장됩니다. 구매처에는 인쇄/PDF 저장 기능으로 전달하세요.</p></section>
+<section class="panel"><div class="document" id="document"><h2 id="docTitle">후보돈 매매 정산서</h2><table><tbody>
+<tr><th>판매일</th><td id="dDate"></td><th>구매처</th><td id="dBuyer"></td></tr>
+<tr><th>판매두수</th><td id="dCount"></td><th>판매단가</th><td id="dUnit"></td></tr>
+<tr><th>평균체중</th><td id="dAvg"></td><th>판매조건</th><td id="dTerms"></td></tr>
+</tbody></table><table><tbody>
+<tr><th>판매두수</th><td id="sCount"></td><th>기준중량(kg)</th><td id="sBase"></td></tr>
+<tr><th>실중량(kg)</th><td id="sWeight"></td><th>증체중량(kg)</th><td id="sGain"></td></tr>
+</tbody></table><table><tbody>
+<tr><th colspan="2">정산내역</th><th colspan="2">금액</th></tr>
+<tr><td colspan="2" id="baseDesc"></td><td colspan="2" class="right" id="baseAmount"></td></tr>
+<tr id="gainRow"><td colspan="2" id="gainDesc"></td><td colspan="2" class="right" id="gainAmount"></td></tr>
+<tr><th colspan="2">최종 청구액</th><td colspan="2" class="right sum" id="total"></td></tr>
+</tbody></table><table><tbody><tr><th>입금계좌</th><td colspan="3" id="dAccount"></td></tr><tr id="memoRow"><th>비고</th><td colspan="3" id="dMemo"></td></tr></tbody></table><div class="foot">농업회사법인 주식회사 새솔</div></div></section></main>
+<script>
+const $=id=>document.getElementById(id),ids=['kind','date','buyer','count','unit','baseWeight','weight','gainUnit','bank','account','owner','terms','memo'],key='sesol-sale-settlements-v1';let current=null;
+const fmt=n=>Number(n||0).toLocaleString('ko-KR',{maximumFractionDigits:2}),money=n=>fmt(n)+'원',val=id=>$(id).value,num=id=>Number(val(id)||0),text=(id,v)=>$(id).textContent=v;
+function values(){return Object.fromEntries(ids.map(id=>[id,val(id)]))}
+function render(){const count=num('count'),unit=num('unit'),base=num('baseWeight')*count,weight=num('weight'),gain=weight-base,gainAmount=val('kind')==='gilt'?gain*num('gainUnit'):0,baseAmount=count*unit,total=baseAmount+gainAmount;
+text('docTitle',val('kind')==='gilt'?'후보돈 매매 정산서':'자돈 매매 정산서');text('dDate',val('date'));text('dBuyer',val('buyer')||'');text('dCount',fmt(count)+'두');text('dUnit',money(unit)+'/두');text('dAvg',count?fmt(weight/count)+'kg':'');text('dTerms',val('terms'));text('sCount',fmt(count)+'두');text('sBase',fmt(base));text('sWeight',fmt(weight));text('sGain',(gain>0?'+':'')+fmt(gain));text('baseDesc',fmt(count)+'두 × '+money(unit));text('baseAmount',money(baseAmount));text('gainDesc',fmt(gain)+'kg × '+money(num('gainUnit')));text('gainAmount',money(gainAmount));text('total',money(total));text('dAccount',[val('bank'),val('account'),'예금주 '+val('owner')].filter(Boolean).join(' / '));text('dMemo',val('memo'));$('memoRow').style.display=val('memo')?'':'none';$('gainRow').style.display=val('kind')==='gilt'?'':'none';$('gainUnit').disabled=val('kind')==='piglet';}
+function defaults(kind){const pig=kind==='piglet';$('unit').value=pig?170000:560000;$('baseWeight').value=pig?28:90;$('gainUnit').value=pig?0:3000;$('bank').value=pig?'농협':'우체국';$('account').value=pig?'351-1084-4454-13':'100-0000-05044';$('terms').value=pig?'체중 관계없이 두당 170,000원':'90kg 기준 증체비 kg당 3,000원';$('owner').value='농업회사법인 주식회사 새솔';render()}
+function rows(){try{const x=JSON.parse(localStorage.getItem(key)||'[]');return Array.isArray(x)?x:[]}catch{return []}}
+function list(){const el=$('records');el.replaceChildren();const a=rows().sort((x,y)=>String(y.date).localeCompare(String(x.date)));if(!a.length){el.textContent='저장된 정산서 없음';return}for(const r of a){const b=document.createElement('button');b.className='secondary';b.textContent=(r.kind==='gilt'?'후보돈':'자돈')+' · '+r.date+' · '+(r.buyer||'구매처 미입력');b.onclick=()=>{current=r.id;for(const id of ids)$(id).value=r[id]??'';render();$('status').textContent='정산서 불러옴';window.scrollTo(0,0)};el.appendChild(b)}}
+$('kind').addEventListener('change',()=>defaults(val('kind')));for(const id of ids)$(id).addEventListener('input',render);
+$('save').onclick=()=>{if(!val('date')||!val('buyer')||num('count')<=0)return alert('판매일, 구매처, 판매두수를 입력하세요');if(val('kind')==='gilt'&&num('weight')<num('baseWeight')*num('count')){if(!confirm('실중량이 기준중량보다 적어 증체금액이 차감됩니다. 그대로 저장할까요?'))return}const id=current||String(Date.now());const a=rows().filter(r=>r.id!==id);a.push({id,...values()});localStorage.setItem(key,JSON.stringify(a));current=id;list();$('status').textContent='저장 완료 (이 브라우저)';};
+$('new').onclick=()=>{current=null;$('buyer').value='';$('count').value=0;$('weight').value=0;$('memo').value='';render();$('status').textContent='새 정산서'};
+$('remove').onclick=()=>{if(!current||!confirm('현재 정산서를 삭제할까요?'))return;localStorage.setItem(key,JSON.stringify(rows().filter(x=>x.id!==current)));current=null;list();$('status').textContent='삭제 완료'};
+$('print').onclick=()=>window.print();
+const now=new Date();$('date').value=new Date(now.getTime()-now.getTimezoneOffset()*60000).toISOString().slice(0,10);render();list();
+</script></body></html>
