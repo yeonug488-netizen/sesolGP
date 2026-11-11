@@ -73,6 +73,7 @@ sections.forEach(([row,col,title,headers,labels])=>{
  const wide=headers.length>4;
  html+='<section class="dailyCard'+(wide?' wide':'')+'"><div class="dailyCardHead"><span class="dailyCardNum">'+esc(title.split(/[ ,]/)[0])+'</span><span class="dailyCardTitle">'+esc(title.replace(/^[0-9]+[,. ]*/,''))+'</span></div><div class="dailyTableWrap"><table class="dailyTable"><thead><tr>'+headers.map(h=>'<th>'+esc(h)+'</th>').join('')+'</tr></thead><tbody>';
  labels.forEach((label,i)=>{html+='<tr><th>'+esc(label)+'</th>';for(let j=1;j<headers.length;j++){const id=(row+1+i)+'_'+(col+j);html+='<td>'+inputCell(id,title,label,headers[j])+'</td>'}html+='</tr>'});
+ if(title==='7 분만현황'){for(const [key,label] of [['farrow_female','암'],['farrow_castrated','거세']]){html+='<tr><th>'+label+'</th><td><input class="xlsInput" data-cell="'+key+'" inputmode="numeric" type="number" min="0" step="1" aria-label="분만 '+label+'" value="'+esc(saved[key]??'')+'"></td><td><span style="font-size:12px;color:#64748b">생존산자수 암·거세 구분</span></td></tr>';}}
  html+='</tbody></table></div></section>';
 });
 html+='</div><section class="dailyCard wide" style="margin-top:16px"><div class="dailyCardHead"><span class="dailyCardTitle">재고 계산 검증</span></div><div id="stockAudit" style="padding:14px 18px;font-size:13px;line-height:1.8"></div></section>';
@@ -81,6 +82,7 @@ html+='<p class="note">연한 초록색은 자동 계산 항목입니다. 전일
 el.innerHTML=html;
 const purchaseType={value:'split'};
 const get=(r,c)=>el.querySelector('[data-cell="'+r+'_'+c+'"]');
+const getFarrowSex=key=>{const v=el.querySelector('[data-cell="'+key+'"]')?.value;return v===''||v===undefined?null:Number(v)};
 const num=(r,c)=>Number(get(r,c)?.value||0);
 const put=(r,c,v)=>{const x=get(r,c);if(x){x.value=String(v);x.readOnly=true;x.style.background='#e6f2eb'}};
 // 저장된 당일재고는 과거 수식으로 계산됐을 수 있으므로 사용하지 않는다.
@@ -224,7 +226,7 @@ totals();
  }catch(e){console.warn('월 누계 조회 실패',e)}})();
 document.getElementById('sheetSave').onclick=async()=>{
  if(!d||d<'2026-11-01')return alert('11월 1일 이후 날짜를 선택해줘');
- totals();if(el.dataset.negativeStock)return alert('재고가 음수입니다: '+el.dataset.negativeStock+'\\n판매·폐사·편입 수량을 확인해 주세요.');if(Array.from({length:7},(_,i)=>get(4,i+3)).some(x=>!x||x.value===''))return alert('전날 사육일보의 당일재고가 없어 저장할 수 없습니다. 전날 일보를 먼저 저장해 주세요.');const obj={memo:saved.memo||'',gilt_purchase_type:'split'};
+ totals();const female=getFarrowSex('farrow_female'),castrated=getFarrowSex('farrow_castrated');if((female!==null||castrated!==null)&&((female===null||castrated===null)||female+castrated!==num(14,14)))return alert('분만 암·거세 두수의 합계가 생존산자수와 일치해야 합니다.');if(el.dataset.negativeStock)return alert('재고가 음수입니다: '+el.dataset.negativeStock+'\\n판매·폐사·편입 수량을 확인해 주세요.');if(Array.from({length:7},(_,i)=>get(4,i+3)).some(x=>!x||x.value===''))return alert('전날 사육일보의 당일재고가 없어 저장할 수 없습니다. 전날 일보를 먼저 저장해 주세요.');const obj={memo:saved.memo||'',gilt_purchase_type:'split'};
  el.querySelectorAll('[data-cell]').forEach(x=>obj[x.dataset.cell]=x.value);
  const row={report_date:d,sheet_data:obj,memo:obj.memo,
  breeding_stock:num(5,3)+num(5,4)+num(5,5),
