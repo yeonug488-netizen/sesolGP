@@ -407,7 +407,7 @@ const verifiedAugustTotalBorn2026={'2026-02-23':206,'2026-08-03':276,'2026-08-10
 const confirmedConception2026=[['2026-01',106,13],['2026-02',105,15],['2026-03',110,15],['2026-04',136,16],['2026-05',89,12],['2026-06',103,10],['2026-07',110,20],['2026-08',98,13],['2026-09',111,24],['2026-10 1주차',25,6]];
 function renderConfirmedConception(){
  const fmt=n=>n.toLocaleString('ko-KR');
- const rows=confirmedConception2026.map(([period,mating,failed])=>{const pregnant=mating-failed;return '<tr><td>'+period+'</td><td>'+fmt(mating)+'</td><td>'+fmt(failed)+'</td><td>'+fmt(pregnant)+'</td><td><b>'+(100*pregnant/mating).toFixed(1)+'%</b></td></tr>'}).join('');
+ const rows=[...confirmedConception2026].reverse().map(([period,mating,failed])=>{const pregnant=mating-failed;return '<tr><td>'+period+'</td><td>'+fmt(mating)+'</td><td>'+fmt(failed)+'</td><td>'+fmt(pregnant)+'</td><td><b>'+(100*pregnant/mating).toFixed(1)+'%</b></td></tr>'}).join('');
  const mating=confirmedConception2026.reduce((a,r)=>a+r[1],0),failed=confirmedConception2026.reduce((a,r)=>a+r[2],0),pregnant=mating-failed;
  $a('conceptionConfirmedBody').innerHTML=rows+'<tr style="font-weight:700;background:#e8f2fb"><td>확정 누계</td><td>'+fmt(mating)+'</td><td>'+fmt(failed)+'</td><td>'+fmt(pregnant)+'</td><td>'+(100*pregnant/mating).toFixed(1)+'%</td></tr>';
  $a('conceptionConfirmedNote').textContent='확정 누계 '+fmt(mating)+'복 교배 / '+fmt(failed)+'복 수태사고 / '+fmt(pregnant)+'복 수태확인. 이후 수태체크는 교배 28일 후 확인 결과를 원래 교배 기간에 귀속하여 관리합니다.';
