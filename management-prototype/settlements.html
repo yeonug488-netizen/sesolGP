@@ -9,8 +9,8 @@
 <label>기준중량 (kg/두)<input type="number" min="0" step=".01" id="baseWeight" value="90"></label>
 <label>실중량 (kg, 전체)<input type="number" min="0" step=".01" id="weight" value="0"></label>
 <label>증체단가 (원/kg)<input type="number" min="0" step="1" id="gainUnit" value="3000"></label>
-<label>입금은행<input id="bank" value="우체국"></label>
-<label class="wide">입금계좌<input id="account" value="100-0000-05044"></label>
+<label>입금은행<input id="bank" value="농협"></label>
+<label class="wide">입금계좌<input id="account" value="301-0380-5873-81"></label>
 <label class="wide">예금주<input id="owner" value="농업회사법인 주식회사 새솔"></label>
 <label class="full">판매조건<textarea id="terms">90kg 기준 증체비 kg당 3,000원</textarea></label>
 <label class="full">비고<textarea id="memo"></textarea></label>
@@ -35,7 +35,7 @@ const fmt=n=>Number(n||0).toLocaleString('ko-KR',{maximumFractionDigits:2}),mone
 function values(){return Object.fromEntries(ids.map(id=>[id,val(id)]))}
 function render(){const count=num('count'),unit=num('unit'),base=num('baseWeight')*count,weight=num('weight'),gain=weight-base,gainAmount=val('kind')==='gilt'?gain*num('gainUnit'):0,baseAmount=count*unit,total=baseAmount+gainAmount;
 text('docTitle',val('kind')==='gilt'?'후보돈 매매 정산서':'자돈 매매 정산서');text('dDate',val('date'));text('dBuyer',val('buyer')||'');text('dCount',fmt(count)+'두');text('dUnit',money(unit)+'/두');text('dAvg',count?fmt(weight/count)+'kg':'');text('dTerms',val('terms'));text('sCount',fmt(count)+'두');text('sBase',fmt(base));text('sWeight',fmt(weight));text('sGain',(gain>0?'+':'')+fmt(gain));text('baseDesc',fmt(count)+'두 × '+money(unit));text('baseAmount',money(baseAmount));text('gainDesc',fmt(gain)+'kg × '+money(num('gainUnit')));text('gainAmount',money(gainAmount));text('total',money(total));text('dAccount',[val('bank'),val('account'),'예금주 '+val('owner')].filter(Boolean).join(' / '));text('dMemo',val('memo'));$('memoRow').style.display=val('memo')?'':'none';$('gainRow').style.display=val('kind')==='gilt'?'':'none';$('gainUnit').disabled=val('kind')==='piglet';}
-function defaults(kind){const pig=kind==='piglet';$('unit').value=pig?170000:560000;$('baseWeight').value=pig?28:90;$('gainUnit').value=pig?0:3000;$('bank').value=pig?'농협':'우체국';$('account').value=pig?'351-1084-4454-13':'100-0000-05044';$('terms').value=pig?'체중 관계없이 두당 170,000원':'90kg 기준 증체비 kg당 3,000원';$('owner').value='농업회사법인 주식회사 새솔';render()}
+function defaults(kind){const pig=kind==='piglet';$('unit').value=pig?170000:560000;$('baseWeight').value=pig?28:90;$('gainUnit').value=pig?0:3000;$('bank').value='농협';$('account').value=pig?'301-0380-5873-81':'301-0380-5873-81';$('terms').value=pig?'체중 관계없이 두당 170,000원':'90kg 기준 증체비 kg당 3,000원';$('owner').value='농업회사법인 주식회사 새솔';render()}
 function rows(){try{const x=JSON.parse(localStorage.getItem(key)||'[]');return Array.isArray(x)?x:[]}catch{return []}}
 function list(){const el=$('records');el.replaceChildren();const a=rows().sort((x,y)=>String(y.date).localeCompare(String(x.date)));if(!a.length){el.textContent='저장된 정산서 없음';return}for(const r of a){const b=document.createElement('button');b.className='secondary';b.textContent=(r.kind==='gilt'?'후보돈':'자돈')+' · '+r.date+' · '+(r.buyer||'구매처 미입력');b.onclick=()=>{current=r.id;for(const id of ids)$(id).value=r[id]??'';render();$('status').textContent='정산서 불러옴';window.scrollTo(0,0)};el.appendChild(b)}}
 $('kind').addEventListener('change',()=>defaults(val('kind')));for(const id of ids)$(id).addEventListener('input',render);
