@@ -69,5 +69,5 @@ function navigate(direction){const all=rows().sort((a,b)=>String(a.serial||a.dat
 async function remove(){if(!current||!confirm('현재 확인서를 서버에서 삭제할까요?'))return;try{const {error}=await sb.from('fmd_certificates').delete().eq('id',current);if(error)throw error;current=null;await refreshRecords();put('paperStatus','서버에서 삭제 완료')}catch(e){alert('삭제 실패: '+e.message)}}
 $('prevPaper').onclick=()=>navigate(-1);$('nextPaper').onclick=()=>navigate(1);$('savePaper').onclick=save;$('newPaper').onclick=fresh;$('printPaper').onclick=()=>{if(!val('inventory'))return alert('발행일 2일 전 사육일보 연동 후 인쇄하세요');if(!confirm('실제 접종기록을 확인하셨습니까?'))return;window.print()};$('removePaper').onclick=remove;
 $('csfKind').value=val('kind');
-const n=new Date();$('date').value=new Date(n.getTime()-n.getTimezoneOffset()*60000).toISOString().slice(0,10);syncVaccines();syncView();list();syncStock();refreshRecords().catch(e=>{put('paperStatus','서버 조회 실패: '+e.message);alert('발행목록 서버 조회 실패: '+e.message)});
+const n=new Date();$('date').value=new Date(n.getTime()-n.getTimezoneOffset()*60000).toISOString().slice(0,10);syncVaccines();syncView();list();syncStock();refreshContactPresets();refreshRecords().catch(e=>{put('paperStatus','서버 조회 실패: '+e.message);alert('발행목록 서버 조회 실패: '+e.message)});
 </script></body></html>
